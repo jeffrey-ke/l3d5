@@ -6,7 +6,7 @@ import torch.nn.functional as F
 class cls_model(nn.Module):
     def __init__(self, num_classes=3):
         super(cls_model, self).__init__()
-        pass
+        
 
     def forward(self, points):
         '''
@@ -14,6 +14,14 @@ class cls_model(nn.Module):
                 , where B is batch size and N is the number of points per object (N=10000 by default)
         output: tensor of size (B, num_classes)
         '''
+        input transform
+        linear 64 64
+        feature transform
+        linear 64 128 1024
+        max pool into a 1024 (N,1024)
+        linear 512 256 num_classes
+        softmax probably. 
+
         pass
 
 
