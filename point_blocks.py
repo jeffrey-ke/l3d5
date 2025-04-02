@@ -1,0 +1,69 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+
+class InputTransform(nn.Module):
+    def __init__(self, args=None):
+        super(InputTransform, self).__init__()
+        self.block1 = nn.Sequential(
+            nn.Conv2d(3,64,(1,1),1), # don't need any padding probably because it's a 1x1 kernel
+            nn.ReLU(),
+            nn.BatchNorm2d(64),
+        )
+        self.block2 = nn.Sequential(
+            nn.Conv2d(64,128,(1,1),1),
+            nn.ReLU(),
+            nn.BatchNorm2d(128) # is it really batchnorm 2D? Across the batch,
+        )
+        self.block3 = nn.Sequential(
+            nn.Conv2d(128,1024,(1,1),1),
+            nn.ReLU(),
+            nn.BatchNorm2d(1024) # is it really batchnorm 2D? Across the batch,
+            # normalize the 2D face for its given channel...
+        )
+        self.maxpool2d = nn.MaxPool2d((N,1), dilation=??)
+        self.fc512 = nn.Sequential(
+                nn.Linear(1024,512),
+                nn.ReLU(),
+                nn.BatchNorm1d(512)
+        )
+        self.fc256 = nn.Sequential(
+                nn.Linear(512, 256),
+                nn.ReLU(),
+                nn.BatchNorm1d(256)
+        )
+        self.to_transform = nn.Linear(256, 9)
+        def init(m):
+            if isinstance(m, nn.Linear):
+                m.weight.fill_(0.)
+                m.bias.fill_(0.)
+        self.to_transform.apply(init)
+
+
+
+
+    def forward(self, X): # X is shape B,N,3
+        X = X.unsqueeze(-1)
+        X = X.permute((0,2,1,3)) # shape is B,3,N,1
+        X = self.Sequential(
+            X = self.block1(X) #block1: mlp64, relu, bn
+            X = self.block2(X) #block2: mlp128, relu, bn
+            X = self.block3(X) #block3: mlp1024, relu, bn
+        )
+        X = self.maxpool2d(X, kernel=(N,1)) # collapses (B,1024,N,1) to (B,1024,1) probably
+        X = self.view(B,-1)
+        X = self.fc512(X)
+        X = self.fc256(X)
+        X = self.to_transform(X) + torch.Tensor([1., 0., 0., 0., 1., 0., 0., 0., 1.], device=args.device)
+
+        """
+        this is a featurewise maxpool. The first channel is the first feature
+        of all the N points. So this actually only outputs a global feature:
+        the global max of feature 1 across all points
+        """
+        X = X.view((B,-1))
+        X = self.fc512(X) #(B,1024) @ (1024,512) AND RELU
+        X = self.fc256(X) #(B,256)
+        X = self.to_rot(X).view(B,3,3)
+        return X
