@@ -43,11 +43,9 @@ class InputTransform(nn.Module):
         self.to_transform = nn.Linear(256, 9)
         def init(m):
             if isinstance(m, nn.Linear):
-                m.weight.fill_(0.)
-                m.bias.fill_(0.)
+                nn.init.constant_(m.weight, 0.)
+                nn.init.constant_(m.bias, 0.)
         self.to_transform.apply(init)
-
-
 
 
     def forward(self, X): # X is shape B,N,3
