@@ -1,4 +1,5 @@
 import torch
+from jutils.utils import pdb
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -6,6 +7,8 @@ import torch.nn.functional as F
 class InputTransform(nn.Module):
     def __init__(self, args=None):
         super(InputTransform, self).__init__()
+        N = args.n_points
+        self.device = args.device
         self.block1 = nn.Sequential(
             nn.Conv2d(3,64,(1,1),1), # don't need any padding probably because it's a 1x1 kernel
             nn.ReLU(),
@@ -20,9 +23,13 @@ class InputTransform(nn.Module):
             nn.Conv2d(128,1024,(1,1),1),
             nn.ReLU(),
             nn.BatchNorm2d(1024) # is it really batchnorm 2D? Across the batch,
-            # normalize the 2D face for its given channel...
         )
-        self.maxpool2d = nn.MaxPool2d((N,1), dilation=??)
+        self.pointwise_mlps = nn.Sequential(
+                self.block1,
+                self.block2,
+                self.block3,
+                )
+        self.maxpool2d = nn.MaxPool2d((N,1))
         self.fc512 = nn.Sequential(
                 nn.Linear(1024,512),
                 nn.ReLU(),
