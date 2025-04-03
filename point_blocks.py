@@ -49,26 +49,14 @@ class InputTransform(nn.Module):
 
 
     def forward(self, X): # X is shape B,N,3
+        B,N,*_ = X.shape
         X = X.unsqueeze(-1)
         X = X.permute((0,2,1,3)) # shape is B,3,N,1
-        X = self.Sequential(
-            X = self.block1(X) #block1: mlp64, relu, bn
-            X = self.block2(X) #block2: mlp128, relu, bn
-            X = self.block3(X) #block3: mlp1024, relu, bn
-        )
-        X = self.maxpool2d(X, kernel=(N,1)) # collapses (B,1024,N,1) to (B,1024,1) probably
-        X = self.view(B,-1)
+        X = self.pointwise_mlps(X)
+        pdb()
+        X = self.maxpool2d(X) # collapses (B,1024,N,1) to (B,1024,1) probably
+        X = X.view(B,-1)
         X = self.fc512(X)
         X = self.fc256(X)
-        X = self.to_transform(X) + torch.Tensor([1., 0., 0., 0., 1., 0., 0., 0., 1.], device=args.device)
-
-        """
-        this is a featurewise maxpool. The first channel is the first feature
-        of all the N points. So this actually only outputs a global feature:
-        the global max of feature 1 across all points
-        """
-        X = X.view((B,-1))
-        X = self.fc512(X) #(B,1024) @ (1024,512) AND RELU
-        X = self.fc256(X) #(B,256)
-        X = self.to_rot(X).view(B,3,3)
-        return X
+        X = self.to_transform(X) + torch.tensor([1., 0., 0., 0., 1., 0., 0., 0., 1.], device=self.device)
+        return X.view(B,3,3)
