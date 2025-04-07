@@ -67,7 +67,10 @@ class cls_model(nn.Module):
 class seg_model(nn.Module):
     def __init__(self, args, num_seg_classes = 6):
         super(seg_model, self).__init__()
-        pass
+        self.cls_model = cls_model(args)
+        m = args.num_seg_classes
+        self.mlps = PerPointMLP(in_dim=1088, out_dims=[512, 256, 128, 128, m])
+        # wondering if there's a reason for the separation here.
 
     def forward(self, points):
         '''
@@ -75,7 +78,8 @@ class seg_model(nn.Module):
                 , where B is batch size and N is the number of points per object (N=10000 by default)
         output: tensor of size (B, N, num_seg_classes)
         '''
-        pass
+        n1088 = self.cls_model(points)
+
 
 
 
