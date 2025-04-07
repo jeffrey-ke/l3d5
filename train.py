@@ -26,6 +26,7 @@ def train(train_dataloader, model, opt, epoch, args, writer):
         predictions = model(point_clouds, with_smax=True)
         # if this doesn't work then I'll just add F.softmax(predictions, dim=1)
         if (args.task == "seg"):
+
             labels = labels.reshape([-1])
             predictions = predictions.reshape([-1, args.num_seg_class])
             
@@ -78,7 +79,8 @@ def test(test_dataloader, model, epoch, args, writer):
 
             # ------ TO DO: Make Predictions ------
             with torch.no_grad():     
-                pred_labels = None
+                pred_labels = model(point_clouds, with_smax=True)
+                pred_labels = torch.argmax(pred_labels, dim=-1)
 
             correct_point += pred_labels.eq(labels.data).cpu().sum().item()
             num_point += labels.view([-1,1]).size()[0]
