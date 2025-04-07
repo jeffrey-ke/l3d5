@@ -4,3 +4,6 @@ assignment5/
 */checkpoints
 */logs
 */output
+*.swp
+__MACOSX
+__pycache__
