@@ -53,9 +53,10 @@ class cls_model(nn.Module):
 
 
 
+
 # ------ TO DO ------
 class seg_model(nn.Module):
-    def __init__(self, num_seg_classes = 6):
+    def __init__(self, args, num_seg_classes = 6):
         super(seg_model, self).__init__()
         pass
 
