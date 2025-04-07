@@ -20,8 +20,10 @@ def train(train_dataloader, model, opt, epoch, args, writer):
         labels = labels.to(args.device).to(torch.long)
 
         # ------ TO DO: Forward Pass ------
-        predictions = 
-
+        # now what are the freaking dimensions of point_clouds:
+        # probably b,n,3 like the documenation says
+        predictions = model(point_clouds, with_smax=True)
+        # if this doesn't work then I'll just add F.softmax(predictions, dim=1)
         if (args.task == "seg"):
             labels = labels.reshape([-1])
             predictions = predictions.reshape([-1, args.num_seg_class])
@@ -99,9 +101,9 @@ def main(args):
 
     # ------ TO DO: Initialize Model ------
     if args.task == "cls":
-        model = 
+        model = cls_model(args)
     else:
-        model = 
+        model = seg_model(args)
     
     # Load Checkpoint 
     if args.load_checkpoint:
