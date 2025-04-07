@@ -55,9 +55,12 @@ class cls_model(nn.Module):
             n1088 = torch.cat((n64, global_features), dim=-1) #b,n,1088
             return n1088
         else:
+
             output_scores = self.mlp512_256_k(global_features)
+
             if with_smax:
-                return F.softmax(output_scores, dim=1)
+                return F.softmax(output_scores, dim=-1) # -1 or 1, doesn't matter,
+            # but this is more portabl anyway. 
             else:
                 return output_scores
 
@@ -68,18 +71,27 @@ class cls_model(nn.Module):
 class seg_model(nn.Module):
     def __init__(self, args, num_seg_classes = 6):
         super(seg_model, self).__init__()
-        self.cls_model = cls_model(args)
-        m = args.num_seg_classes
-        self.mlps = PerPointMLP(in_dim=1088, out_dims=[512, 256, 128, 128, m])
-        # wondering if there's a reason for the separation here.
+        self.cls_model = cls_model(args, as_seg=True)
+        self.m = num_seg_classes
+        self.mlps = PerPointMLP(in_dim=1088, out_dims=[512, 256, 128, 128])
+        self.seg_head = nn.Conv2d(128, self.m, (1,1))
 
-    def forward(self, points):
+    def forward(self, points, with_smax=False):
         '''
         points: tensor of size (B, N, 3)
                 , where B is batch size and N is the number of points per object (N=10000 by default)
         output: tensor of size (B, N, num_seg_classes)
         '''
-        n1088 = self.cls_model(points)
+        n1088 = self.cls_model(points) #b,n,1088,
+        n1088 = n1088.unsqueeze(-1).permute(0,2,1,3) #b,1088,n,1
+        nm = self.mlps(n1088) # shape is b,128,n,1
+        scores = self.seg_head(nm).permute(0,2,1,3).squeeze(-1) #shape is b,n,n_seg
+
+        if with_smax:
+            return F.softmax(scores, dim=-1)
+        else: 
+            return scores
+
 
 
 
