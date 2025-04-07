@@ -9,6 +9,7 @@ class cls_model(nn.Module):
     def __init__(self, args, num_classes=3):
         super(cls_model, self).__init__()
         N = args.n_points
+        self.as_seg = args.task == "seg"
         self.t_net = InputTransform(args)
         self.mlp64_64 = PerPointMLP(in_dim=3, out_dims=[64,64])
         self.feature_transform = InputTransform(args, dim=64) #kind of important
@@ -45,11 +46,19 @@ class cls_model(nn.Module):
         n1024 = self.mlp64_128_1024(transformed_features) # shape b,1024,n,1
         global_features = self.maxpool(n1024) # shape b,1024,1 -> b,1024,
         global_features = global_features.view(*global_features.shape[:-2])
-        output_scores = self.mlp512_256_k(global_features)
-        if with_smax:
-            return F.softmax(output_scores, dim=1)
+        if self.as_seg:
+            _, n, *_ = n64.shape #n64 is shape b,n,64
+            # initially global_features is shape b,1024
+            # after unsqueeze it is b,1,1024, and after expanding it's b,n,1024
+            global_features = global_features.unsqueeze(1).expand(-1, n, -1) 
+            n1088 = torch.cat((n64, global_features), dim=-1) #b,n,1088
+            return n1088
         else:
-            return output_scores
+            output_scores = self.mlp512_256_k(global_features)
+            if with_smax:
+                return F.softmax(output_scores, dim=1)
+            else:
+                return output_scores
 
 
 
