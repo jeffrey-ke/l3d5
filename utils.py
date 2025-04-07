@@ -71,7 +71,7 @@ def viz_seg (verts, labels, path, device):
 
     sample_verts = verts.unsqueeze(0).repeat(30,1,1).to(torch.float)
     sample_labels = labels.unsqueeze(0)
-    sample_colors = torch.zeros((1,10000,3))
+    sample_colors = torch.zeros((1,500,3))
 
     # Colorize points based on segmentation labels
     for i in range(6):
