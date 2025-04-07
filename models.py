@@ -10,8 +10,9 @@ class cls_model(nn.Module):
         super(cls_model, self).__init__()
         N = args.n_points
         self.t_net = InputTransform(args)
-        self.feature_net = InputTransform(args, dim=64) #kind of important
-        self.mlp64_128_1024 = PerPointMLP(64,128,1024)
+        self.mlp64_64 = PerPointMLP(in_dim=3, out_dims=[64,64])
+        self.feature_transform = InputTransform(args, dim=64) #kind of important
+        self.mlp64_128_1024 = PerPointMLP(in_dim=64, out_dims=[64,128,1024])
         self.maxpool = nn.MaxPool2d((N, 1))
         self.mlp512_256_k = nn.Sequential(
                 nn.Linear(1024, 512),
