@@ -7,10 +7,10 @@ from point_blocks import InputTransform, PerPointMLP
 
 # ------ TO DO ------
 class cls_model(nn.Module):
-    def __init__(self, args, num_classes=3):
+    def __init__(self, args, num_classes=3, as_seg=False):
         super(cls_model, self).__init__()
-        N = args.n_points
-        self.as_seg = args.task == "seg"
+        N = args.num_points
+        self.as_seg = as_seg
         self.t_net = InputTransform(args)
         self.mlp64_64 = PerPointMLP(in_dim=3, out_dims=[64,64])
         self.feature_transform = InputTransform(args, dim=64) #kind of important
