@@ -7,3 +7,4 @@ assignment5/
 *.swp
 __MACOSX
 __pycache__
+*model_epoch_*
