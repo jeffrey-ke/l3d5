@@ -18,11 +18,11 @@ class cls_model(nn.Module):
                 nn.Linear(1024, 512),
                 nn.ReLU(),
                 nn.BatchNorm1d(512),
-                nn.DropOut(p=0.3),
+                nn.Dropout(p=0.3),
                 nn.Linear(512, 256),
                 nn.ReLU(),
                 nn.BatchNorm1d(256),
-                nn.DropOut(p=0.3),
+                nn.Dropout(p=0.3),
                 nn.Linear(256, num_classes), # omitting softmax to use logits loss
                 )
 
