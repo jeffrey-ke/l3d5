@@ -36,7 +36,7 @@ if __name__ == '__main__':
     create_dir(args.output_dir)
 
     # ------ TO DO: Initialize Model for Segmentation Task  ------
-    model = 
+    model = seg_model(args).cuda()
     
     # Load Model Checkpoint
     model_path = './checkpoints/seg/{}.pt'.format(args.load_checkpoint)
@@ -48,16 +48,19 @@ if __name__ == '__main__':
 
 
     # Sample Points per Object
-    ind = np.random.choice(10000,args.num_points, replace=False)
-    test_data = torch.from_numpy((np.load(args.test_data))[:,ind,:])
-    test_label = torch.from_numpy((np.load(args.test_label))[:,ind])
+    ind = np.random.choice(args.num_points,args.num_points, replace=False)
+    test_data = torch.from_numpy((np.load(args.test_data))[:,ind,:]).cuda()
+    test_label = torch.from_numpy((np.load(args.test_label))[:,ind]).cuda()
 
     # ------ TO DO: Make Prediction ------
-    pred_label = 
+    pred_label = model(test_data, with_smax=True)
+    pred_label = torch.argmax(pred_label, dim=-1)
 
     test_accuracy = pred_label.eq(test_label.data).cpu().sum().item() / (test_label.reshape((-1,1)).size()[0])
     print ("test accuracy: {}".format(test_accuracy))
 
     # Visualize Segmentation Result (Pred VS Ground Truth)
-    viz_seg(test_data[args.i], test_label[args.i], "{}/gt_{}.gif".format(args.output_dir, args.exp_name), args.device)
-    viz_seg(test_data[args.i], pred_label[args.i], "{}/pred_{}.gif".format(args.output_dir, args.exp_name), args.device)
+    test_data = test_data.cpu()
+    test_label = test_label.cpu()
+    viz_seg(test_data[args.i], test_label[args.i], "{}/gt_{}_{}.gif".format(args.output_dir, args.exp_name, args.i), args.device)
+    viz_seg(test_data[args.i], pred_label[args.i], "{}/pred_{}_{}.gif".format(args.output_dir, args.exp_name, args.i), args.device)
