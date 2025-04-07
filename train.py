@@ -57,7 +57,8 @@ def test(test_dataloader, model, epoch, args, writer):
 
             # ------ TO DO: Make Predictions ------
             with torch.no_grad():
-                pred_labels = 
+                pred = model(point_clouds, with_smax=True)
+                pred_labels = torch.argmax(pred, dim=1)
             correct_obj += pred_labels.eq(labels.data).cpu().sum().item()
             num_obj += labels.size()[0]
 
@@ -76,7 +77,7 @@ def test(test_dataloader, model, epoch, args, writer):
 
             # ------ TO DO: Make Predictions ------
             with torch.no_grad():     
-                pred_labels = 
+                pred_labels = None
 
             correct_point += pred_labels.eq(labels.data).cpu().sum().item()
             num_point += labels.view([-1,1]).size()[0]
@@ -101,9 +102,9 @@ def main(args):
 
     # ------ TO DO: Initialize Model ------
     if args.task == "cls":
-        model = cls_model(args)
+        model = cls_model(args).to("cuda")
     else:
-        model = seg_model(args)
+        model = seg_model(args).to("cuda")
     
     # Load Checkpoint 
     if args.load_checkpoint:
@@ -162,6 +163,7 @@ def create_parser():
 
     # Training hyper-parameters
     parser.add_argument('--num_epochs', type=int, default=250)
+    parser.add_argument('--n_points', type=int, default=10000)
     parser.add_argument('--batch_size', type=int, default=32, help='The number of images in a batch.')
     parser.add_argument('--num_workers', type=int, default=0, help='The number of threads to use for the DataLoader.')
     parser.add_argument('--lr', type=float, default=0.001, help='The learning rate (default 0.001)')
