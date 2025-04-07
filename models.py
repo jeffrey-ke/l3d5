@@ -33,15 +33,22 @@ class cls_model(nn.Module):
                 , where B is batch size and N is the number of points per object (N=10000 by default)
         output: tensor of size (B, num_classes)
         '''
-        input transform
-        linear 64 64
-        feature transform
-        linear 64 128 1024
-        max pool into a 1024 (N,1024)
-        linear 512 256 num_classes
-        softmax probably. 
-
-        pass
+        # how do I need to tranpose this business?
+        transformed_points = points @ self.t_net(points).transpose(2,1) # What order should it be?
+        transformed_points = points.unsqueeze(-1).permute(0,2,1,3)
+        n64 = self.mlp64_64(transformed_points) # at this point we're at shape b,64,n,1
+        # we want shape b,n,64
+        n64 = n64.permute(0,2,1,3).squeeze(-1) #now shape b,n,64
+        transformed_features = n64 @ self.feature_transform(n64).transpose(2,1) #shape b,64,64
+        transformed_features = transformed_features.unsqueeze(-1).permute(0,2,1,3)
+        # shape b,n,64,1 -> b,64,n,1
+        n1024 = self.mlp64_128_1024(transformed_features) # shape b,1024,n,1
+        global_features = self.maxpool(n1024).squeeze(-1) # shape b,1024,1 -> b,1024,
+        output_scores = self.mlp512_256_k(global_features)
+        if with_smax:
+            return F.softmax(output_scores, dim=1)
+        else:
+            return output_scores
 
 
 
