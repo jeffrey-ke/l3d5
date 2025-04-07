@@ -43,7 +43,8 @@ class cls_model(nn.Module):
         transformed_features = transformed_features.unsqueeze(-1).permute(0,2,1,3)
         # shape b,n,64,1 -> b,64,n,1
         n1024 = self.mlp64_128_1024(transformed_features) # shape b,1024,n,1
-        global_features = self.maxpool(n1024).squeeze(-1) # shape b,1024,1 -> b,1024,
+        global_features = self.maxpool(n1024) # shape b,1024,1 -> b,1024,
+        global_features = global_features.view(*global_features.shape[:-2])
         output_scores = self.mlp512_256_k(global_features)
         if with_smax:
             return F.softmax(output_scores, dim=1)
