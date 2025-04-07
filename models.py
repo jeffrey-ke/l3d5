@@ -35,7 +35,7 @@ class cls_model(nn.Module):
         '''
         # how do I need to tranpose this business?
         transformed_points = points @ self.t_net(points).transpose(2,1) # What order should it be?
-        transformed_points = points.unsqueeze(-1).permute(0,2,1,3)
+        transformed_points = transformed_points.unsqueeze(-1).permute(0,2,1,3)
         n64 = self.mlp64_64(transformed_points) # at this point we're at shape b,64,n,1
         # we want shape b,n,64
         n64 = n64.permute(0,2,1,3).squeeze(-1) #now shape b,n,64
