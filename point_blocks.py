@@ -8,7 +8,7 @@ import torch.nn.functional as F
 class InputTransform(nn.Module):
     def __init__(self, args=None, dim=3):
         super(InputTransform, self).__init__()
-        N = args.n_points
+        N = args.num_points
         self.device = args.device
         self.dim = dim
         self.block1 = nn.Sequential(
