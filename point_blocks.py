@@ -53,10 +53,24 @@ class InputTransform(nn.Module):
         X = X.unsqueeze(-1)
         X = X.permute((0,2,1,3)) # shape is B,3,N,1
         X = self.pointwise_mlps(X)
-        pdb()
         X = self.maxpool2d(X) # collapses (B,1024,N,1) to (B,1024,1) probably
         X = X.view(B,-1)
         X = self.fc512(X)
         X = self.fc256(X)
         X = self.to_transform(X) + torch.tensor([1., 0., 0., 0., 1., 0., 0., 0., 1.], device=self.device)
         return X.view(B,3,3)
+
+class PerPointMLP(nn.Module):
+    def __init__(self, in_dim, out_dims, args=None):
+        super(PerPointMLP, self).__init__()
+        mlps = []
+        last_dim = in_dim
+        for d in out_dims:
+            mlps.append(nn.Conv2d(last_dim, d, (1,1),1)),
+            mlps.append(nn.ReLU()),
+            mlps.append(nn.BatchNorm2d(d))
+        self.perpoint_mlps = nn.Sequential(*mlps)
+
+    def forward(self, X):
+        mlped = self.perpoint_mlps(X)
+        return mlped
