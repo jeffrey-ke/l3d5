@@ -62,5 +62,6 @@ if __name__ == '__main__':
     print("% of dataset is chairs: ", len(test_label[test_label == 0])/len(test_label))
     print("% of dataset is vases: ", len(test_label[test_label == 1])/len(test_label))
     print("% of dataset is lamp: ", len(test_label[test_label == 2])/len(test_label))
+    viz_seg(test_data[args.i], torch.ones_like(test_data[args.i][..., 1]), "{}/{}points_idx{}.gif".format(args.output_dir, args.num_points, args.i), args.device, args.num_points)
     print ("test accuracy: {}".format(test_accuracy))
 
