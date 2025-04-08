@@ -52,9 +52,15 @@ if __name__ == '__main__':
     test_label = torch.from_numpy(np.load(args.test_label))
 
     # ------ TO DO: Make Prediction ------
-    pred_label = 
+    pred_label = model(test_data, with_smax=True)
+    pred_label = torch.argmax(pred_label, dim=-1).cpu()
 
     # Compute Accuracy
     test_accuracy = pred_label.eq(test_label.data).cpu().sum().item() / (test_label.size()[0])
+    test_data = test_data.cpu()
+    print("stats: ")
+    print("% of dataset is chairs: ", len(test_label[test_label == 0])/len(test_label))
+    print("% of dataset is vases: ", len(test_label[test_label == 1])/len(test_label))
+    print("% of dataset is lamp: ", len(test_label[test_label == 2])/len(test_label))
     print ("test accuracy: {}".format(test_accuracy))
 
