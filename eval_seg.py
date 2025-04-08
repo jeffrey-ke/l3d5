@@ -70,5 +70,6 @@ if __name__ == '__main__':
     print("Disagreeing idxs: ", np.random.choice(very_disagreed.cpu(), 5, replace=False))
     test_data = test_data.cpu()
     test_label = test_label.cpu()
-    viz_seg(test_data[args.i], test_label[args.i], "{}/gt_{}_{}.gif".format(args.output_dir, args.exp_name, args.i), args.device)
-    viz_seg(test_data[args.i], pred_label[args.i], "{}/pred_{}_{}.gif".format(args.output_dir, args.exp_name, args.i), args.device)
+    
+    viz_seg(test_data[args.i], test_label[args.i], "{}/gt_{}_{}.gif".format(args.output_dir, args.args.num_points, args.i), args.device, args.num_points)
+    viz_seg(test_data[args.i], pred_label[args.i], "{}/pred_{}_{}.gif".format(args.output_dir, args.args.num_points, args.i), args.device, args.num_points)
