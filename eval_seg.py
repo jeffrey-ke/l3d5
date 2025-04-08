@@ -14,10 +14,11 @@ def create_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--num_seg_class', type=int, default=6, help='The number of segmentation classes')
-    parser.add_argument('--num_points', type=int, default=10000, help='The number of points per object to be included in the input data')
+    parser.add_argument('--num_points', type=int, default=500, help='The number of points per object to be included in the input data')
+    parser.add_argument('--use_transform', action="store_true")
 
     # Directories and checkpoint/sample iterations
-    parser.add_argument('--load_checkpoint', type=str, default='model_epoch_0')
+    parser.add_argument('--load_checkpoint', type=str, default='best_model')
     parser.add_argument('--i', type=int, default=0, help="index of the object to visualize")
 
     parser.add_argument('--test_data', type=str, default='./data/seg/data_test.npy')
@@ -71,5 +72,5 @@ if __name__ == '__main__':
     test_data = test_data.cpu()
     test_label = test_label.cpu()
     
-    viz_seg(test_data[args.i], test_label[args.i], "{}/gt_{}_{}.gif".format(args.output_dir, args.args.num_points, args.i), args.device, args.num_points)
-    viz_seg(test_data[args.i], pred_label[args.i], "{}/pred_{}_{}.gif".format(args.output_dir, args.args.num_points, args.i), args.device, args.num_points)
+    viz_seg(test_data[args.i], test_label[args.i], "{}/gt_{}_{}.gif".format(args.output_dir, args.num_points, args.i), args.device, args.num_points)
+    viz_seg(test_data[args.i], pred_label[args.i], "{}/pred_{}_{}.gif".format(args.output_dir, args.num_points, args.i), args.device, args.num_points)
