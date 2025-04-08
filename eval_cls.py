@@ -1,9 +1,10 @@
 import numpy as np
+from jutils.utils import pdb
 import argparse
 
 import torch
 from models import cls_model
-from utils import create_dir
+from utils import create_dir, viz_seg
 
 def create_parser():
     """Creates a parser for command-line arguments.
@@ -34,7 +35,7 @@ if __name__ == '__main__':
     create_dir(args.output_dir)
 
     # ------ TO DO: Initialize Model for Classification Task ------
-    model = 
+    model = cls_model(args).cuda()
     
     # Load Model Checkpoint
     model_path = './checkpoints/cls/{}.pt'.format(args.load_checkpoint)
