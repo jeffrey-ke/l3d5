@@ -53,7 +53,7 @@ def get_points_renderer(
     return renderer
 
 
-def viz_seg (verts, labels, path, device):
+def viz_seg (verts, labels, path, device, n_points):
     """
     visualize segmentation result
     output: a 360-degree gif
@@ -71,7 +71,7 @@ def viz_seg (verts, labels, path, device):
 
     sample_verts = verts.unsqueeze(0).repeat(30,1,1).to(torch.float)
     sample_labels = labels.unsqueeze(0)
-    sample_colors = torch.zeros((1,500,3))
+    sample_colors = torch.zeros((1,n_points,3))
 
     # Colorize points based on segmentation labels
     for i in range(6):
@@ -85,5 +85,5 @@ def viz_seg (verts, labels, path, device):
     rend = renderer(point_cloud, cameras=c).cpu().numpy() # (30, 256, 256, 3)
     rend = (rend * 255).astype(np.uint8)
 
-    imageio.mimsave(path, rend, fps=15)
+    imageio.mimsave(path, rend, fps=15, loop=0)
 
