@@ -1,4 +1,5 @@
 import numpy as np
+from jutils.utils import pdb
 import argparse
 
 import torch
@@ -60,6 +61,13 @@ if __name__ == '__main__':
     print ("test accuracy: {}".format(test_accuracy))
 
     # Visualize Segmentation Result (Pred VS Ground Truth)
+    disagreement = (test_label != pred_label).float()
+    thres = 0.30
+    disagreement = torch.sum(disagreement, dim=-1) / disagreement.shape[1]
+    very_disagreed = (disagreement > thres).nonzero().squeeze(-1)
+    print(f"% of examples segmented with error > {thres}: ", len(very_disagreed) / len(disagreement))
+    np.random.seed(10)
+    print("Disagreeing idxs: ", np.random.choice(very_disagreed.cpu(), 5, replace=False))
     test_data = test_data.cpu()
     test_label = test_label.cpu()
     viz_seg(test_data[args.i], test_label[args.i], "{}/gt_{}_{}.gif".format(args.output_dir, args.exp_name, args.i), args.device)
