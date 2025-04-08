@@ -9,8 +9,12 @@ from point_blocks import InputTransform, PerPointMLP
 class cls_model(nn.Module):
     def __init__(self, args, num_classes=3, as_seg=False):
         super(cls_model, self).__init__()
-        N = args.num_points
+        ### flags
         self.as_seg = as_seg
+        self.use_transform = args.use_transform
+
+        ### layers
+        N = args.num_points
         self.t_net = InputTransform(args)
         self.mlp64_64 = PerPointMLP(in_dim=3, out_dims=[64,64])
         self.feature_transform = InputTransform(args, dim=64) #kind of important
@@ -35,13 +39,18 @@ class cls_model(nn.Module):
                 , where B is batch size and N is the number of points per object (N=10000 by default)
         output: tensor of size (B, num_classes)
         '''
-        # how do I need to tranpose this business?
-        transformed_points = points @ self.t_net(points).transpose(2,1) # What order should it be?
+        if self.use_transform:
+            transformed_points = points @ self.t_net(points).transpose(2,1) # What order should it be?
+        else:
+            transformed_points = points
         transformed_points = transformed_points.unsqueeze(-1).permute(0,2,1,3)
         n64 = self.mlp64_64(transformed_points) # at this point we're at shape b,64,n,1
         # we want shape b,n,64
         n64 = n64.permute(0,2,1,3).squeeze(-1) #now shape b,n,64
-        transformed_features = n64 @ self.feature_transform(n64).transpose(2,1) #shape b,64,64
+        if self.use_transform:
+            transformed_features = n64 @ self.feature_transform(n64).transpose(2,1) #shape b,64,64
+        else:
+            transformed_features = n64
         transformed_features = transformed_features.unsqueeze(-1).permute(0,2,1,3)
         # shape b,n,64,1 -> b,64,n,1
         n1024 = self.mlp64_128_1024(transformed_features) # shape b,1024,n,1
